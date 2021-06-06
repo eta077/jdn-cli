@@ -1,5 +1,7 @@
+#![deny(missing_docs)]
 //! A service used to provide a command line user interface.
 
+/// Defines a manager responsible for handling command line input and output.
 pub mod manager;
 
 use std::collections::HashSet;
@@ -11,12 +13,20 @@ use std::vec::Vec;
 /// An enumeration of errors that can occur while executing a CLI command.
 #[derive(Debug)]
 pub enum CliError {
+    /// Indicates an invalid number of arguments was given to the handler.
     InvalidNumberOfArguments {
+        /// The minimum or only number of arguments expected.
         min: usize,
+        /// The maximum number of arguments expected.
         max: Option<usize>,
+        /// The number of arguments that was given to the handler.
         given: usize,
     },
+    /// Indicates an argument was unable to be coerced from a String.
+    /// The internal attribute contains a description of the error that occurred.
     ArgumentParseFailure(String),
+    /// Indicates an error occurred while executing the command.
+    /// The internal attribute contains a description of the error that occurred.
     ExecutionError(String),
 }
 
