@@ -12,7 +12,7 @@ jobs:
   test:
     name: Test with coverage
     env:
-      PROJECT_NAME_UNDERSCORE: jdn_echo
+      PROJECT_NAME_UNDERSCORE: jdn_cli
       CARGO_INCREMENTAL: 0
       RUSTFLAGS: -Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort
       RUSTDOCFLAGS: -Cpanic=abort
