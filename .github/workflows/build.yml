@@ -1,10 +1,12 @@
 on:
+  push:
+    branches:
+      - release
   pull_request:
     branches:
-      - release*
+      - release
 
-
-name: Stage1
+name: Build
 
 jobs:
   fmt:
