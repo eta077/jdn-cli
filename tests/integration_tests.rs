@@ -104,16 +104,19 @@ fn test_one_handler() -> std::io::Result<()> {
     print(help_command.to_vec(), None)?;
 
     // expect help response
-    let help_response = TestHandler::IS_RUNNING_COMMAND.to_owned()
+    let help_response = TestHandler::CALCULATE_COMMAND.to_owned()
+        + "\n"
+        + TestHandler::IS_RUNNING_COMMAND
         + "\n"
         + TestHandler::START_COMMAND
         + "\n"
         + TestHandler::STOP_COMMAND
         + "\n";
-    let mut prompt_buf = [0; TestHandler::IS_RUNNING_COMMAND.len()
+    let mut prompt_buf = [0; TestHandler::CALCULATE_COMMAND.len()
+        + TestHandler::IS_RUNNING_COMMAND.len()
         + TestHandler::START_COMMAND.len()
         + TestHandler::STOP_COMMAND.len()
-        + 3];
+        + 4];
     out_buf.read(&mut prompt_buf)?;
     print(prompt_buf.to_vec(), Some(help_response))?;
 
@@ -182,7 +185,9 @@ fn test_two_handlers() -> std::io::Result<()> {
     print(help_command.to_vec(), None)?;
 
     // expect help response
-    let help_response = TestHandler2::END_COMMAND.to_owned()
+    let help_response = TestHandler::CALCULATE_COMMAND.to_owned()
+        + "\n"
+        + TestHandler2::END_COMMAND
         + "\n"
         + TestHandler::IS_RUNNING_COMMAND
         + "\n"
@@ -190,11 +195,12 @@ fn test_two_handlers() -> std::io::Result<()> {
         + "\n"
         + TestHandler::STOP_COMMAND
         + "\n";
-    let mut prompt_buf = [0; TestHandler2::END_COMMAND.len()
+    let mut prompt_buf = [0; TestHandler::CALCULATE_COMMAND.len()
+        + TestHandler2::END_COMMAND.len()
         + TestHandler::IS_RUNNING_COMMAND.len()
         + TestHandler::START_COMMAND.len()
         + TestHandler::STOP_COMMAND.len()
-        + 4];
+        + 5];
     out_buf.read(&mut prompt_buf)?;
     print(prompt_buf.to_vec(), Some(help_response))?;
 
