@@ -45,7 +45,12 @@ impl Display for CliError {
                     min, expected_max_string, given
                 )
             }
-            _ => write!(f, "{:?}", self),
+            CliError::ArgumentParseFailure(s) => {
+                write!(f, "Argument parse failure: {}", s)
+            }
+            CliError::ExecutionError(s) => {
+                write!(f, "Execution error: {}", s)
+            }
         }
     }
 }
