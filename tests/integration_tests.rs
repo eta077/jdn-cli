@@ -279,6 +279,22 @@ fn test_complex_commands() -> std::io::Result<()> {
     out_buf.read(&mut prompt_buf)?;
     print(prompt_buf.to_vec(), Some(PROMPT.to_owned()))?;
 
+    // send invalid start command
+    let start_command = b"start complex calculation\n";
+    in_stream.write(start_command)?;
+    print(start_command.to_vec(), None)?;
+
+    // expect start response
+    let started_response = String::from("Invalid number of arguments: expected 0-1, received 2.\n");
+    let mut prompt_buf = [0; 55];
+    out_buf.read(&mut prompt_buf)?;
+    print(prompt_buf.to_vec(), Some(started_response))?;
+
+    // expect prompt
+    let mut prompt_buf = [0; PROMPT.len()];
+    out_buf.read(&mut prompt_buf)?;
+    print(prompt_buf.to_vec(), Some(PROMPT.to_owned()))?;
+
     // send start command
     let start_command = b"start\n";
     in_stream.write(start_command)?;
@@ -442,7 +458,7 @@ impl Write for TestBuffer {
 }
 
 pub struct TestHandler {
-    on: Mutex<Option<bool>>,
+    on: Mutex<Option<String>>,
 }
 
 impl TestHandler {
@@ -470,7 +486,15 @@ impl CliHandler for TestHandler {
     fn handle_command(&self, command: &str, args: Vec<String>, writer: &mut dyn Write) -> Result<(), CliError> {
         match command {
             Self::START_COMMAND => {
-                *self.on.lock().expect("Unable to lock `on`") = Some(true);
+                if args.len() > 1 {
+                    return Err(CliError::InvalidNumberOfArguments {
+                        min: 0,
+                        max: Some(1),
+                        given: args.len(),
+                    });
+                }
+                let name = args.get(0).cloned().unwrap_or_default();
+                *self.on.lock().expect("Unable to lock `on`") = Some(name);
                 writeln!(writer, "started").expect("Failed to write start response");
                 Ok(())
             }
@@ -482,7 +506,7 @@ impl CliHandler for TestHandler {
                         given: args.len(),
                     });
                 }
-                if self.on.lock().expect("Unable to lock `on`").unwrap_or(false) {
+                if self.on.lock().expect("Unable to lock `on`").is_some() {
                     let result_name = &args[0];
                     let num1 =
                         i32::from_str_radix(&args[1], 10).map_err(|e| CliError::ArgumentParseFailure(e.to_string()))?;
@@ -520,12 +544,12 @@ impl CliHandler for TestHandler {
                 }
             }
             Self::STOP_COMMAND => {
-                *self.on.lock().expect("Unable to lock `on`") = Some(false);
+                *self.on.lock().expect("Unable to lock `on`") = None;
                 writeln!(writer, "stopped").expect("Failed to write stop response");
                 Ok(())
             }
             Self::IS_RUNNING_COMMAND => {
-                writeln!(writer, "{:?}", *self.on.lock().expect("Unable to lock `on`"))
+                writeln!(writer, "{}", self.on.lock().expect("Unable to lock `on`").is_some())
                     .expect("Failed to write is-running response");
                 Ok(())
             }
